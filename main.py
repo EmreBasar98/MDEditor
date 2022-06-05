@@ -41,8 +41,8 @@ class Window(Frame):
         self.master.title("MarkDown Editor")
         self.pack(fill=BOTH, expand=1)
 
-        self.inputeditor = Text(self, width="0")
-        self.inputeditor.pack(fill=BOTH, expand=0, side=LEFT)
+        self.inputeditor = Text(self, width="1")
+        self.inputeditor.pack(fill=BOTH, expand=1, side=LEFT)
         self.inputeditor.configure(font=("Arial", 11))
 
         self.outputbox = HTMLLabel(self, width="1", background="white")
