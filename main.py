@@ -3,6 +3,8 @@ from tkinter import font , filedialog
 from markdown2 import Markdown
 from tkhtmlview import HTMLLabel
 from tkinter import messagebox as mbox
+from ctypes import windll
+from BlurWindow.blurWindow import blur
 
 class Window(Frame):
     def __init__(self, master=None):
@@ -57,6 +59,7 @@ class Window(Frame):
         self.filemenu.add_command(label="Exit", command=self.quit)
         self.mainmenu.add_cascade(label="File", menu=self.filemenu)
         self.master.config(menu=self.mainmenu)
+        self.master.wm_attributes("-alpha", 0.7)
 
 root = Tk()
 root.geometry("1500x900")
