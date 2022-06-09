@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QFrame, QHBoxLayout,QVBoxLayout, QPlainTextEdit, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QFrame, QHBoxLayout,QVBoxLayout, QPlainTextEdit, QLabel,QGridLayout, QTextEdit
 import sys
 from PyQt5.QtCore import Qt 
 from BlurWindow.blurWindow import blur
@@ -18,30 +18,34 @@ class MainWindow(QWidget):
         hWnd = self.winId()
         blur(hWnd)
 
-        # hbox = QHBoxLayout()
-        # self.inputeditor = QPlainTextEdit(self)
-        # # self.inputeditor.setFrameShape(QPlainTextEdit.StyledPanel)
-        # hbox.addWidget(self.inputeditor)
-        # self.outputbox = QLabel(self)
-        # self.outputbox.setFrameShape(QFrame.StyledPanel)
-        # hbox.addWidget(self.outputbox)
-        # # self.inputeditor.bind("<<Modified>>", self.onInputChange)
-        # self.setLayout(hbox)
-        # self.show()
+    
+        self.bgColor = "255,255,255"
+        self.textColor = "white"
 
-        self.setLayout(QVBoxLayout())
-        self.h_layout = QHBoxLayout()
-        self.layout().addLayout(self.h_layout)
+        self.layout = QGridLayout()
+        self.setLayout(self.layout)
 
         self.inputeditor = QPlainTextEdit(self)
-        self.inputeditor.resize(750,500)
-
-        self.inputStyle = """ color: white;background: rgba(0,0,255,20%);"""    
+        self.inputStyle = """ color: {color:s};background: rgba({bg:s},20%);"""    
         self.setElemFont(self.inputeditor)
-        self.setElemStyle(self.inputeditor, self.inputStyle)
-        
+        self.setElemStyle(self.inputeditor, self.inputStyle.format(color = self.textColor, bg = self.bgColor))
+        self.layout.addWidget(self.inputeditor, 0, 1)
+
+
+        self.outBox = QTextEdit(self)
+        self.outStyle = """ color: {color:s};background: rgba({bg:s},20%);"""    
+        self.setElemFont(self.outBox)
+        self.setElemStyle(self.outBox, self.outStyle.format(color = self.textColor, bg = self.bgColor))
+        self.outBox.setReadOnly(True)
+        self.layout.addWidget(self.outBox, 0, 2)
+
+
+        self.inputeditor.textChanged.connect(self.toOut) 
         self.setWindowStyle()
                         
+    def toOut(self):
+        self.outBox.setMarkdown(self.inputeditor.toPlainText())
+
 
     def setElemFont(self, elem):
         font = QtGui.QFont('Arial', 10)
