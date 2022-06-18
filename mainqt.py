@@ -1,58 +1,57 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QFrame, QHBoxLayout,QVBoxLayout, QPlainTextEdit, QLabel,QGridLayout, QTextEdit
-import sys
-from PyQt5.QtCore import Qt 
-from BlurWindow.blurWindow import blur
-from markdown2 import Markdown
-from tkhtmlview import HTMLLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QFrame, QHBoxLayout,QVBoxLayout, QPlainTextEdit, QLabel,QGridLayout, QTextEdit, QMainWindow
 from PyQt5 import QtGui
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QIcon
+import sys
+from BlurWindow.blurWindow import blur
 
 #source ../env/Scripts/activate
 class MainWindow(QWidget):
     def __init__(self):
         super(MainWindow, self).__init__()
         
-        self.title = "MarkDown Editor"
-        self.setWindowTitle(self.title)
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.resize(1500, 900)
-        hWnd = self.winId()
-        blur(hWnd)
-
-    
-        self.bgColor = "255,255,255"
+        self.title = "MDEditor"
+        self.bgColor = "0,0,0"
         self.textColor = "white"
+        self.transparency = "20"
+        self.darkTheme = True
 
         self.layout = QGridLayout()
         self.setLayout(self.layout)
 
-        self.inputeditor = QPlainTextEdit(self)
-        self.inputStyle = """ color: {color:s};background: rgba({bg:s},20%);"""    
-        self.setElemFont(self.inputeditor)
-        self.setElemStyle(self.inputeditor, self.inputStyle.format(color = self.textColor, bg = self.bgColor))
-        self.layout.addWidget(self.inputeditor, 0, 1)
+        self.prepareInputBox()
+        self.prepareOutputBox()
 
+        self.declareConnections()
 
-        self.outBox = QTextEdit(self)
-        self.outStyle = """ color: {color:s};background: rgba({bg:s},20%);"""    
-        self.setElemFont(self.outBox)
-        self.setElemStyle(self.outBox, self.outStyle.format(color = self.textColor, bg = self.bgColor))
-        self.outBox.setReadOnly(True)
-        self.layout.addWidget(self.outBox, 0, 2)
-
-
-        self.inputeditor.textChanged.connect(self.toOut) 
         self.setWindowStyle()
                         
     def toOut(self):
         self.outBox.setMarkdown(self.inputeditor.toPlainText())
 
+    def prepareInputBox(self):
+        self.inputeditor = QTextEdit(self)
+        self.inputStyle = """ color: {color:s};background: rgba({bg:s},{t:s}%);padding-left:25px;padding-right:25px;padding-top:35px"""  
+        self.setElemFont(self.inputeditor)
+        self.setElemStyle(self.inputeditor, self.inputStyle.format(color = self.textColor, bg = self.bgColor, t = self.transparency))
+        self.layout.addWidget(self.inputeditor, 0, 1)
 
-    def setElemFont(self, elem):
-        font = QtGui.QFont('Arial', 10)
-        elem.setFont(font)
+    def prepareOutputBox(self):
+        self.outBox = QTextEdit(self)
+        self.outStyle = """ color: {color:s};background: rgba({bg:s},{t:s}%);padding-left:25px;padding-right:25;padding-top:35px"""    
+        self.setElemFont(self.outBox)
+        self.setElemStyle(self.outBox, self.outStyle.format(color = self.textColor, bg = self.bgColor, t = self.transparency))
+        self.outBox.setReadOnly(True)
+        self.layout.addWidget(self.outBox, 0, 2)
 
-    def setElemTextColor(self, elem, clr):
-        elem.setStyleSheet("color: "+ clr)
+    def declareConnections(self):
+        self.inputeditor.textChanged.connect(self.toOut) 
+
+    def setElemFont(self, elem, f = None):
+        if f is None:
+            f = QtGui.QFont('Arial', 10)
+        elem.setFont(f)
+
         
     def setElemStyle(self, elem, sh):
         elem.setStyleSheet(sh)
@@ -67,16 +66,31 @@ class MainWindow(QWidget):
             """ 
         )
 
-    def setElemOpacity(self,elem, val):
-        elem.setStyleSheet("background: rgba(0,0,255,"+ str(val) +"%)")
+class WrapperWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.editor = MainWindow()
+        self.resize(1500, 900)
+        self.setCentralWidget(self.editor)
 
-    def onInputChange(self , event):
-        self.inputeditor.edit_modified(0)
-        md2html = Markdown()
-        self.outputbox.set_html(md2html.convert(self.inputeditor.get("1.0" , END)))
+        self.setWindowTitle(" ")
+        self.darkTheme = True
+        self.blurEditor()
+
+        self.icon = QPixmap(32,32)
+
+        self.icon.fill( Qt.transparent );
+        self.setWindowIcon(QIcon( self.icon));
+
+    def blurEditor(self):
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        hWnd = self.winId()
+        blur(hWnd,Dark=self.darkTheme)
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    mw = MainWindow()
+    mw = WrapperWindow()
     mw.show()
     sys.exit(app.exec_())
