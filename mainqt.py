@@ -88,7 +88,6 @@ class WrapperWindow(QMainWindow):
         blur(hWnd,Dark=self.darkTheme)
 
 
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mw = WrapperWindow()
